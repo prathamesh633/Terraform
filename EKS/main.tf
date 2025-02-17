@@ -1,4 +1,4 @@
-
+# EKS cluster role
 resource "aws_iam_role" "demo" {
   name = "${var.cluster_name}-role"
 
@@ -18,11 +18,13 @@ resource "aws_iam_role" "demo" {
 POLICY
 }
 
+# EKS cluster policy attached to the role
 resource "aws_iam_role_policy_attachment" "demo-AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.demo.name
 }
 
+# Creating EKS cluster
 resource "aws_eks_cluster" "demo" {
   name     = var.cluster_name
   role_arn = aws_iam_role.demo.arn
@@ -37,7 +39,7 @@ resource "aws_eks_cluster" "demo" {
   depends_on = [aws_iam_role_policy_attachment.demo-AmazonEKSClusterPolicy]
 }
 
-
+# Creating role for nodes of Cluster
 resource "aws_iam_role" "nodes" {
   name = "eks-node-group-nodes"
 
@@ -53,6 +55,7 @@ resource "aws_iam_role" "nodes" {
   })
 }
 
+# Attaching needed policies to the node role
 resource "aws_iam_role_policy_attachment" "nodes-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.nodes.name
@@ -68,15 +71,14 @@ resource "aws_iam_role_policy_attachment" "nodes-AmazonEC2ContainerRegistryReadO
   role       = aws_iam_role.nodes.name
 }
 
+# Creating EKS node group
 resource "aws_eks_node_group" "private-nodes" {
   cluster_name    = aws_eks_cluster.demo.name
   node_group_name = "private-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
+  subnet_ids      = var.subnet_ids
 
-
-  subnet_ids = var.node_group_subnet_id
-
-  capacity_type  = "ON_DEMAND"
+  capacity_type  = "ON_DEMAND" // Helps to give define the capacity of nodes in the group. eg. t2.micro, t3.medium, etc.
   instance_types = [var.instance_type]
 
   scaling_config {
@@ -99,29 +101,10 @@ resource "aws_eks_node_group" "private-nodes" {
     effect = "NO_SCHEDULE"
   }
 
-  launch_template {
-    name    = aws_launch_template.eks-with-disks.name
-    version = aws_launch_template.eks-with-disks.latest_version
-  }
 
   depends_on = [
     aws_iam_role_policy_attachment.nodes-AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.nodes-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.nodes-AmazonEC2ContainerRegistryReadOnly,
   ]
-}
-
-resource "aws_launch_template" "eks-with-disks" {
-  name = "eks-with-disks"
-
-  key_name = "local-provisioner"
-
-  block_device_mappings {
-    device_name = "/dev/xvdb"
-
-    ebs {
-      volume_size = 50
-      volume_type = "gp2"
-    }
-  }
 }

@@ -38,3 +38,7 @@ variable "given_user" {
 variable "policy_names" {
   default = ["AmazonEC2FullAccess", "AmazonS3FullAccess"]
 }
+
+variable "eks-tag" {
+  default = "demo-cluster"
+}
