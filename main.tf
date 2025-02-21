@@ -51,13 +51,13 @@ module "EC2" {
 #   policy_names = var.policy_names
 # }
 
-# module "eks" {
-#   source               = "./eks"
-#   cluster_name         = "${var.eks-tag}-deploy-cluster"
-#   subnet_ids           = module.VPC.private_subnet_id
-#   instance_type        = "t2.medium"
-#   desired_size         = 2
-#   max_size             = 5
-#   min_size             = 1
-# }
+module "eks" {
+  source               = "./eks"
+  cluster_name         = "${var.eks-tag}-deploy-cluster"
+  subnet_ids           = module.VPC.private_subnet_id
+  instance_type        = "t2.medium"
+  desired_size         = 2
+  max_size             = 5
+  min_size             = 1
+}
 
