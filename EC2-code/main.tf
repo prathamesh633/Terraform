@@ -7,6 +7,19 @@ resource "aws_instance" "a" {
   subnet_id = var.subnet_id
   associate_public_ip_address = var.public_ip
   iam_instance_profile = aws_iam_instance_profile.demo_role_profile.name
+    user_data = <<-EOF
+    #!/bin/bash
+    sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    sudo dnf upgrade
+    sudo yum -y install java-17
+    sudo dnf install -y jenkins
+    sudo systemctl daemon-reload
+    sudo systemctl enable jenkins
+    sudo systemctl start jenkins
+    EOF
+
   tags = {
     Name = var.tags
     
