@@ -7,6 +7,8 @@ terraform {
   }
 }
 
+# added the access and secret keys in profile
+# command - 'aws configure' --> give the keys and mention the region
 provider "aws"{
   profile = "user"
   region = "ap-south-1"
