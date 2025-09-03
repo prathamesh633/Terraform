@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    stages {
+        stage('git checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Pritam-Khergade/student-ui.git']]) 
+            }
+        }
+        stage('build') {
+            steps {
+                sh'''
+                sudo yum install docker -y 
+                sudo systemctl start docker
+                sudo systemctl enable docker
+
+                '''
+                sh 'sudo docker build -t student-ui .'
+            }
+        }
+        stage('ecr push') {
+            steps {
+                sh '''
+                aws ecr get-login-password --region ap-south-1 | sudo docker login --username AWS --password-stdin 985539766104.dkr.ecr.ap-south-1.amazonaws.com
+                sudo docker tag student-ui:latest 985539766104.dkr.ecr.ap-south-1.amazonaws.com/student-ui:${BRANCH}-${BUILD_TIMESTAMP}
+                sudo docker push 985539766104.dkr.ecr.ap-south-1.amazonaws.com/student-ui:${BRANCH}-${BUILD_TIMESTAMP}
+                '''
+            }
+        }
+        stage('docker cleanup') {
+            steps {
+                sh ' sudo docker system prune -a -f'
+            }
+        }
+    }
+}

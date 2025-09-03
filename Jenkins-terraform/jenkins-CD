@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('git checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Pritam-Khergade/student-ui.git']])
+            }
+        }
+        stage('deploy') {
+            steps {
+                sh'''
+                ls -al
+                aws eks update-kubeconfig --region "$REGION"  --name "$CLUSTER"
+                sed -i "s/student-ui:.*/student-ui:$IMAGE/" deploy.yaml
+                kubectl apply -f ./
+
+                '''
+            }
+        }
+    }
+}

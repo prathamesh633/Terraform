@@ -1,0 +1,107 @@
+# Terraform
+- We use Terraform to manage our IAC(Infrastructure As Code).
+- It is used to create resources on cloud.
+- We cannot make it on premises as it is code.
+- terraform file name --> file_name.tf
+  main.tf --> 
+  provider.tf. --> cloud provider configuration file to define aur service provider.
+  var.tf or variable.tf --> if our terraform file needs some variables we define them here. 
+
+# Installation 
+- site --> https://developer.hashicorp.com/terraform/install#linux
+ OR
+sudo yum install -y yum-utils shadow-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum -y install terraform
+
+# Steps to initialize the code of terraform
+- step 1: terraform init 
+  initialises the terraform process.
+  provider are downloaded and terraform.lock.hcl created.
+
+- step 2: terraform plan 
+  will show the plan od infrastructure.
+  always check if the things we mentioned are properly mentioned or not.
+
+- step 3: terraform apply
+  will apply our configuration file to the cloud provider.
+  
+  we can apply '--auto-approve' to skip the confirmation prompt.
+
+- To delete
+ terraform destroy --> deletes the infrastructure created by terraform.
+
+# functions
+ length() 
+ element() 
+for_each --> loop
+
+# Modules
+- We can reuse our code with the help of modules.
+- The reusablity can be with minimum changes.
+- Also we do not pass hard coded values in the EC2, VPC, S3 etc. main.tf file we do that in modules.
+ It helps us to reuse code just by changing values in the modules.
+
+- ingress --> inbound of security group
+- egress --> outbound of security group
+- Dynamic ingress --> we mention the ports in module and then we use for_each loop to create multiple ingress rules.
+ (ingress rules -- inbound security group ports)
+- Data block --> we use data block to get the data from the cloud provider.
+
+# for_each
+- In Terraform, for_each is used when we need to create multiple resources dynamically based on a set or map of values.
+
+# toset
+- We use toset in Terraform to ensure that the values passed to for_each are unique and properly structured for iteration.
+- The values passed to for_each should be a set or map not a list and toset converts the given list into a set.
+- The converted set ensures the uniqueness of the values passed to for_each.
+# example
+data "aws_iam_policy" "selected" {
+  for_each = ["AmazonEC2FullAccess", "AmazonS3FullAccess"]
+  name     = each.value
+}
+- The values we will give --> ["AmazonEC2FullAccess", "AmazonS3FullAccess"]
+- what 'toset' will convert it to --> (["AmazonEC2FullAccess", "AmazonS3FullAccess"])
+- what terraform will read the above code as:-
+        data "aws_iam_policy" "selected" {
+          name = "AmazonEC2FullAccess"
+        }
+
+        data "aws_iam_policy" "selected" {
+          name = "AmazonS3FullAccess"
+        }
+
+
+If we want to make different environment using same module we make var.tf of the main module file.
+
+- file_name.tfvar
+- file_name.auto.tfvars --> By default this var file will be selected in plan.
+- terraform plan --var-file=filename.tfvar
+
+# Workspace (interviwe que)
+- terraform workspace new name
+- terraform workspace new name_workspace
+- terraform workspace select name_workspace
+
+
+
+# we we make changes in the infra and we want to plan and apply a specific module we cna do that by
+ ---> terraform plan -target=module.module_name
+
+in terraform we pass userdata using  EOF(end of file) 
+
+
+
+things to do in eks code.
+Attach the role to the ec2 in eks terraform code using iamcode.
+
+task
+make 4 users in eks cluster
+alpha beta gama vascodagam
+all the 4 users will have access to their own namespace
+each user should have access to their own namespace and they should not be able to even see eachother.
+
+Task:
+the modules that are passed read and understand them
+pull the eks module and see how it works and is there any thing that we can do to improve it.
+

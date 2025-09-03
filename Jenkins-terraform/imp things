@@ -1,0 +1,14 @@
+- change the access point from configMap to API and configMap
+- add new access point:
+  no changes in principal arn
+  standard
+  policy - amazonclusteradminpolicy 
+- attach admin policy to the jenkins ec2-instance.
+- add jenkins to sudoers
+- add credentials of the instance.
+- no deploy.yaml in student-ui repo
+
+questions:
+hum kubernetes aur jenkins ko ek instance prr kaise chalarahe
+cd k deploy part me hum krr kya rahe
+'sed' kyo use krr rahe aur bina uske kam ho skta kya humara
